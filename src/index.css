@@ -455,17 +455,24 @@ textarea, .reference-text {
   container-type: inline-size;
   position: relative;
   
-  /* Paper visual styles moved here */
-  background-color: #fefefe;
-  background-image: url('/answer_form.png');
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  background-position: 0 0;
+  /* Paper visual styles */
+  background-color: #ffffff;
   border-radius: 4px;
   box-shadow: 
     inset 0 0 8px rgba(0, 0, 0, 0.04),
     2px 4px 20px rgba(0, 0, 0, 0.4),
     0 0 40px rgba(108, 140, 255, 0.05);
+}
+
+.page-background-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .right-panel textarea {
@@ -478,6 +485,8 @@ textarea, .reference-text {
   resize: none;
   /* Decoupled 2D exact mapping allows physical page stretching without misalignment */
   padding: 6.857cqh 8.8cqw 7.748cqh 30.1cqw;
+  position: relative;
+  z-index: 1;
   color: #1a1a2e;
   line-height: 3.831cqh;
   background: transparent;
@@ -493,82 +502,14 @@ textarea, .reference-text {
   color: #b0b0c0;
 }
 
-
-/* ═══════════════════════════════════════════
-   PROGRESS BAR
-   ═══════════════════════════════════════════ */
-.progress-container {
-  height: 3px;
-  background: rgba(255, 255, 255, 0.03);
-  width: 100%;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  overflow: hidden;
+/* 짝수 페이지용 미러링 패딩 (바인딩 마진 좌우 반전) */
+.textarea-wrapper.even-page textarea,
+.textarea-wrapper.even-page .print-text-overlay {
+  padding-top: 7.05cqh !important;
+  padding-left: 17.6cqw !important;
+  padding-right: 21.3cqw !important;
 }
 
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--success), #2dd4bf);
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 12px var(--success-glow);
-  position: relative;
-}
-
-.progress-bar::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: -2px;
-  bottom: -2px;
-  width: 20px;
-  background: rgba(52, 211, 153, 0.5);
-  filter: blur(6px);
-  border-radius: 50%;
-}
-
-/* ═══════════════════════════════════════════
-   STATS BAR  
-   ═══════════════════════════════════════════ */
-.stats-bar {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 8px 0;
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-
-.stat-value {
-  color: var(--text-primary);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-/* ═══════════════════════════════════════════
-   PROGRESS RING (header display)
-   ═══════════════════════════════════════════ */
-.progress-display {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-
-.progress-display .percent {
-  color: var(--success);
-  font-size: 0.9rem;
-  font-weight: 700;
-}
 
 /* ═══════════════════════════════════════════
    SCROLLBAR
@@ -671,6 +612,38 @@ textarea, .reference-text {
 }
 
 /* ═══════════════════════════════════════════
+   PAGE NAVIGATION & MASK
+   ═══════════════════════════════════════════ */
+.icon-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px !important;
+  color: var(--text-secondary) !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover:not(:disabled) {
+  color: white !important;
+  background: rgba(255,255,255,0.1) !important;
+}
+
+.icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+@media screen {
+  .textarea-wrapper:not(.active-page) {
+    display: none !important; /* Hide inactive pages from screen UI to form a flipbook */
+  }
+}
+
+/* ═══════════════════════════════════════════
    PRINT MEDIA QUERY (For exact A4 answer sheet export)
    ═══════════════════════════════════════════ */
 @media print {
@@ -678,7 +651,7 @@ textarea, .reference-text {
     size: A4 portrait;
     margin: 0;
   }
-  
+
   body, html {
     background: white !important;
     height: auto !important;
@@ -687,15 +660,29 @@ textarea, .reference-text {
     overflow: visible !important;
   }
 
+  /* Kill all pseudo-element decorations & backdrop filters in print */
+  body::before, body::after,
+  header::before,
+  .left-panel::before, .right-panel::before,
+  button::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
   /* Hide UI elements strongly */
-  header, 
-  .left-panel, 
+  header,
+  .left-panel,
   .panel-header {
     display: none !important;
   }
 
-  .app-container, 
-  .workspace, 
+  .app-container,
+  .workspace,
   .right-panel {
     display: block !important;
     position: static !important;
@@ -707,6 +694,7 @@ textarea, .reference-text {
     background: transparent !important;
     border: none !important;
     overflow: visible !important;
+    animation: none !important;
   }
 
   /* Expand container to clear print page */
@@ -714,14 +702,15 @@ textarea, .reference-text {
     display: block !important;
     padding: 0 !important;
     margin: 0 !important;
-    container-type: inline-size !important;
     overflow: visible !important;
+    background: transparent !important;
+    container-type: normal !important;
   }
 
   .print-hide {
     display: none !important;
   }
-
+  
   .print-show {
     display: block !important;
   }
@@ -730,7 +719,12 @@ textarea, .reference-text {
     width: 100% !important;
     height: 100% !important;
     box-sizing: border-box;
+    position: relative;
+    z-index: 10 !important;
     padding: 6.857cqh 8.8cqw 7.748cqh 30.1cqw;
+    padding-top: 6.857cqh !important;
+    padding-left: 30.1cqw !important;
+    padding-right: 8.8cqw !important;
     color: #1a1a2e !important;
     line-height: 3.831cqh;
     font-weight: 500;
@@ -741,21 +735,32 @@ textarea, .reference-text {
     overflow: visible !important;
   }
 
-  .textarea-wrapper {
+  .textarea-wrapper:not(.print-exclude) {
     width: 210mm !important;
     height: 297mm !important;
     max-width: none !important;
     max-height: none !important;
     aspect-ratio: auto !important;
-    display: block !important;
-    padding: 0 !important;
-    margin: 0 auto !important;
-    overflow: hidden !important;
     background-color: white !important;
     /* Force browser to print the background image */
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    page-break-after: always;
     page-break-inside: avoid;
+    break-after: page;
+    container-type: size !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .textarea-wrapper.even-page .print-text-overlay {
+    padding-top: 7.05cqh !important;
+    padding-left: 17.6cqw !important;
+    padding-right: 21.3cqw !important;
+  }
+
+  .textarea-wrapper.print-exclude {
+    display: none !important;
   }
 
   .right-panel textarea {

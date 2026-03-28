@@ -1,111 +1,167 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
-import { Settings, Save, RotateCcw, PenTool, Layout, FileText, Zap, BarChart3, Printer } from 'lucide-react';
-import { answersData } from './data';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { RotateCcw, Layout, Printer, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
 import './index.css';
 
-const compressText = (text) => text.replace(/#/g, '').split('\n').map(l => l.trim()).filter(line => line.length > 0).join('\n');
+const TOTAL_PAGES = 14;
+const EMPTY_PAGES = Array(TOTAL_PAGES).fill('');
+const DEFAULT_PLACEHOLDER = '📂 위의 [파일 업로드] 버튼을 눌러 연습하실 MD 파일을 올려주세요.';
+const SHORTCUTS = { '1': '·', '2': '•' };
+
+const compressText = (text) => text.replace(/#/g, '').split('\n').map(l => l.trim()).filter(l => l.length > 0).join('\n');
+
+const getStoredDocs = () => {
+  const raw = localStorage.getItem('pe-exam-uploaded-docs');
+  return raw ? JSON.parse(raw) : [];
+};
+
+const initState = () => {
+  const docs = getStoredDocs();
+  const cachedRef = localStorage.getItem('pe-exam-ref-text');
+  const storedDocId = localStorage.getItem('pe-exam-selected-doc-id');
+
+  let referenceText = DEFAULT_PLACEHOLDER;
+  if (docs.length === 0 && cachedRef && cachedRef !== DEFAULT_PLACEHOLDER) {
+    localStorage.removeItem('pe-exam-ref-text');
+    localStorage.removeItem('pe-exam-input-text');
+  } else if (cachedRef) {
+    referenceText = compressText(cachedRef);
+  }
+
+  let pages = [...EMPTY_PAGES];
+  if (docs.length > 0) {
+    const cached = localStorage.getItem('pe-exam-pages-text');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length === TOTAL_PAGES) pages = parsed;
+      } catch {}
+    }
+  }
+
+  let selectedDocsId = 'custom';
+  if (storedDocId && docs.some(d => String(d.id) === storedDocId)) {
+    selectedDocsId = storedDocId;
+  } else if (docs.length > 0 && cachedRef) {
+    const match = docs.find(d => compressText(d.content) === cachedRef);
+    if (match) selectedDocsId = String(match.id);
+  }
+
+  return { referenceText, pages, docs, selectedDocsId };
+};
 
 const App = () => {
-  const [referenceText, setReferenceText] = useState(() => {
-    const cached = localStorage.getItem('pe-exam-ref-text');
-    return cached ? compressText(cached) : compressText(answersData[0].content);
-  });
-  const [inputText, setInputText] = useState(() => {
-    const cached = localStorage.getItem('pe-exam-input-text');
-    return cached || '';
-  });
-  const [isEditingRef, setIsEditingRef] = useState(false);
-  const [editTempText, setEditTempText] = useState(referenceText);
-  const [selectedDocsId, setSelectedDocsId] = useState(() => {
-      const match = answersData.find(d => compressText(d.content) === localStorage.getItem('pe-exam-ref-text'));
-      return match ? match.id : 'custom';
-  });
+  const initial = useState(initState)[0];
+  const [referenceText, setReferenceText] = useState(initial.referenceText);
+  const [pages, setPages] = useState(initial.pages);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [uploadedDocs, setUploadedDocs] = useState(initial.docs);
+  const [selectedDocsId, setSelectedDocsId] = useState(initial.selectedDocsId);
 
   const rightPaneRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const pagesTimerRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem('pe-exam-ref-text', referenceText);
   }, [referenceText]);
 
   useEffect(() => {
-    localStorage.setItem('pe-exam-input-text', inputText);
-  }, [inputText]);
+    clearTimeout(pagesTimerRef.current);
+    pagesTimerRef.current = setTimeout(() => {
+      localStorage.setItem('pe-exam-pages-text', JSON.stringify(pages));
+    }, 500);
+    return () => clearTimeout(pagesTimerRef.current);
+  }, [pages]);
 
-  const handleEditorSave = () => {
-    const newRefText = compressText(editTempText);
-    setReferenceText(newRefText);
-    setEditTempText(newRefText);
-    setIsEditingRef(false);
-    setInputText(''); 
-    setSelectedDocsId('custom');
+  useEffect(() => {
+    localStorage.setItem('pe-exam-uploaded-docs', JSON.stringify(uploadedDocs));
+  }, [uploadedDocs]);
+
+  useEffect(() => {
+    localStorage.setItem('pe-exam-selected-doc-id', selectedDocsId);
+  }, [selectedDocsId]);
+
+  const resetPages = useCallback(() => {
+    setPages([...EMPTY_PAGES]);
+    setCurrentPage(1);
+  }, []);
+
+  const totalInputText = useMemo(() => pages.join(''), [pages]);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (totalInputText.length > 0) {
+      if (!confirm('새 파일을 업로드하면 현재 작성 중인 내용이 초기화됩니다. 진행하시겠습니까?')) {
+        e.target.value = null;
+        return;
+      }
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target.result;
+      setReferenceText(compressText(text));
+      resetPages();
+
+      const newDocId = 'uploaded-' + Date.now();
+      setUploadedDocs(prev => [...prev, { id: newDocId, title: file.name.replace('.md', ''), content: text }]);
+      setSelectedDocsId(newDocId);
+    };
+    reader.readAsText(file);
+    e.target.value = null;
   };
 
   const handleReset = () => {
     if (confirm('작성 중인 내용을 초기화하시겠습니까?')) {
-      setInputText('');
+      resetPages();
     }
+  };
+
+  const handlePageChange = (index, value) => {
+    setPages(prev => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
   };
 
   const handleSelectDoc = (e) => {
     const val = e.target.value;
+    if (val === 'custom') {
+      setSelectedDocsId(val);
+      return;
+    }
+    const selected = uploadedDocs.find(d => String(d.id) === String(val));
+    if (!selected) return;
+
+    if (totalInputText.length > 0) {
+      if (!confirm('문서를 변경하면 현재 작성 중인 내용이 초기화됩니다. 변경하시겠습니까?')) return;
+    }
     setSelectedDocsId(val);
-    if (val !== 'custom') {
-      const selected = answersData.find(d => d.id === Number(val));
-      if (selected) {
-        if (inputText.length > 0) {
-            if (!confirm('문서를 변경하면 현재 작성 중인 내용이 초기화됩니다. 변경하시겠습니까?')) {
-                setSelectedDocsId(selectedDocsId);
-                return;
-            }
-        }
-        const compressed = compressText(selected.content);
-        setReferenceText(compressed);
-        setEditTempText(compressed);
-        setInputText('');
-        setIsEditingRef(false);
-      }
-    }
+    setReferenceText(compressText(selected.content));
+    resetPages();
   };
 
-  const { progress, matchCount, accuracy } = useMemo(() => {
-    if (!referenceText) return { progress: 0, matchCount: 0, accuracy: 0 };
-    const maxLen = referenceText.length;
-    if (maxLen === 0) return { progress: 0, matchCount: 0, accuracy: 0 };
-    
-    let mc = 0;
-    for (let i = 0; i < Math.min(inputText.length, maxLen); i++) {
-        if (inputText[i] === referenceText[i]) mc++;
-    }
-    return {
-      progress: (mc / maxLen) * 100,
-      matchCount: mc,
-      accuracy: inputText.length > 0 ? (mc / Math.min(inputText.length, maxLen)) * 100 : 0
-    };
-  }, [inputText, referenceText]);
-
-  const renderReferenceText = () => {
-    return referenceText;
-  };
+  const lastFilledPageIndex = useMemo(() => {
+    return pages.findLastIndex(p => p.trim()) ?? 0;
+  }, [pages]);
 
   const insertAtCursor = (char) => {
     const el = rightPaneRef.current;
     if (!el) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    const newText = inputText.substring(0, start) + char + inputText.substring(end);
-    setInputText(newText);
-    setTimeout(() => {
-        el.selectionStart = el.selectionEnd = start + char.length;
-    }, 0);
+    const { selectionStart: start, selectionEnd: end } = el;
+    const currentStr = pages[currentPage - 1];
+    handlePageChange(currentPage - 1, currentStr.substring(0, start) + char + currentStr.substring(end));
+    setTimeout(() => { el.selectionStart = el.selectionEnd = start + char.length; }, 0);
   };
 
   const handleKeyDown = (e) => {
-    if (e.ctrlKey && e.key === '1') {
+    const char = e.ctrlKey && SHORTCUTS[e.key];
+    if (char) {
       e.preventDefault();
-      insertAtCursor('·');
-    } else if (e.ctrlKey && e.key === '2') {
-      e.preventDefault();
-      insertAtCursor('•');
+      insertAtCursor(char);
     }
   };
 
@@ -118,119 +174,90 @@ const App = () => {
         </div>
         <div className="header-actions">
           <div className="select-wrapper">
-            <FileText size={15} color="var(--text-muted)" />
-            <select 
-              value={selectedDocsId} 
-              onChange={handleSelectDoc}
-            >
-                <option value="custom">직접 입력 / 수정됨</option>
-                {answersData.map(doc => (
-                    <option key={doc.id} value={doc.id}>{doc.title}</option>
-                ))}
+            <Layout size={15} color="var(--text-muted)" />
+            <select value={selectedDocsId} onChange={handleSelectDoc}>
+              <option value="custom">직접 입력 / 수정됨</option>
+              {uploadedDocs.map(doc => (
+                <option key={doc.id} value={doc.id}>{doc.title}</option>
+              ))}
             </select>
           </div>
 
-          {isEditingRef ? (
-            <button className="primary" onClick={handleEditorSave}>
-              <Save size={15} /> 저장 및 적용
-            </button>
-          ) : (
-            <>
-              <button onClick={() => {
-                setEditTempText(referenceText);
-                setIsEditingRef(true);
-              }}>
-                <Settings size={15} /> 답안 편집
-              </button>
-              <button onClick={handleReset}>
-                <RotateCcw size={15} /> 초기화
-              </button>
-              <button onClick={() => window.print()} className="primary">
-                <Printer size={15} /> PDF 저장 / 인쇄
-              </button>
-            </>
-          )}
+          <input type="file" accept=".md,.txt" style={{display: 'none'}} ref={fileInputRef} onChange={handleFileUpload} />
+          <button onClick={() => fileInputRef.current?.click()}>
+            <Upload size={15} /> 파일 업로드
+          </button>
+          <button onClick={handleReset}>
+            <RotateCcw size={15} /> 초기화
+          </button>
+          <button onClick={() => window.print()} className="primary">
+            <Printer size={15} /> PDF 저장 / 인쇄
+          </button>
         </div>
       </header>
 
       <main className="workspace">
         <div className="panel left-panel">
-          <div className="panel-header">
-            <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
-              <Layout size={15} color="var(--accent)" />
-              기준 답안
-            </div>
-            <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-              {selectedDocsId !== 'custom' && (
-                  <span className="badge">기본 문서</span>
-              )}
-              {inputText.length > 0 && (
-                <div className="stats-bar">
-                  <div className="stat-item">
-                    <Zap size={12} color="var(--accent)" />
-                    <span className="stat-value">{inputText.length}</span>자
-                  </div>
-                  <div className="stat-item">
-                    <BarChart3 size={12} color="var(--success)" />
-                    정확도 <span className="stat-value">{Math.floor(accuracy)}%</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <div className="panel-header">기준 답안</div>
           <div className="panel-content">
-            {isEditingRef ? (
-               <textarea 
-                 value={editTempText}
-                 onChange={(e) => setEditTempText(e.target.value)}
-                 className="reference-text editable"
-                 placeholder="암기할 텍스트를 이곳에 붙여넣고 저장하세요."
-                 autoFocus
-               />
-            ) : (
-               <div className="reference-text">
-                 {renderReferenceText()}
-               </div>
-            )}
-            
-            {!isEditingRef && (
-              <div className="progress-container">
-                <div className="progress-bar" style={{width: `${progress}%`}} />
-              </div>
-            )}
+            <div className="reference-text">{referenceText}</div>
           </div>
         </div>
 
         <div className="panel right-panel">
           <div className="panel-header">
             <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
-              <PenTool size={15} color="var(--success)" />
               타이핑 연습
-            </div>
-            <div className="progress-display">
-              진행률 <span className="percent">{Math.floor(progress)}%</span>
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="icon-btn print-hide"
+                style={{marginLeft: '10px'}}
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="print-hide" style={{fontSize:'13px', fontWeight:'600', minWidth:'45px', textAlign:'center', color:'var(--text-secondary)'}}>
+                {currentPage} / {TOTAL_PAGES} 쪽
+              </span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(TOTAL_PAGES, p + 1))}
+                disabled={currentPage === TOTAL_PAGES}
+                className="icon-btn print-hide"
+              >
+                <ChevronRight size={16} />
+              </button>
             </div>
           </div>
-          <div className="panel-content">
-             <div className="textarea-wrapper">
-               <textarea 
-                 ref={rightPaneRef}
-                 value={inputText}
-                 onChange={(e) => setInputText(e.target.value)}
-                 onKeyDown={handleKeyDown}
-                 placeholder="왼쪽의 내용을 보며 여기에 타이핑을 시작하세요... [단축키] Ctrl+1: · (가운데 점), Ctrl+2: • (목록 점)"
-                 disabled={isEditingRef}
-                 className="print-hide"
-               />
-               <div className="print-show print-text-overlay">
-                 {inputText}
-               </div>
-             </div>
+          <div className="panel-content print-booklet">
+            {pages.map((pText, i) => (
+              <div
+                key={i}
+                className={`textarea-wrapper ${currentPage === i + 1 ? 'active-page' : ''} ${(i + 1) % 2 === 0 ? 'even-page' : 'odd-page'} ${i > lastFilledPageIndex ? 'print-exclude' : ''}`}
+              >
+                <img
+                  src={`/answer_form_page_${i + 1}.png`}
+                  alt=""
+                  className="page-background-img"
+                  loading={currentPage === i + 1 ? 'eager' : 'lazy'}
+                />
+                {currentPage === i + 1 && (
+                  <textarea
+                    ref={rightPaneRef}
+                    value={pages[i]}
+                    onChange={(e) => handlePageChange(i, e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="왼쪽의 내용을 보며 여기에 타이핑을 시작하세요... [단축키] Ctrl+1: · (가운데 점), Ctrl+2: • (목록 점)"
+                    className="print-hide"
+                  />
+                )}
+                <div className="print-show print-text-overlay">{pText}</div>
+              </div>
+            ))}
           </div>
         </div>
       </main>
     </div>
   );
-}
+};
 
 export default App;
