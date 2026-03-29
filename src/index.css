@@ -752,12 +752,11 @@ textarea, .reference-text {
     box-sizing: border-box;
     position: relative;
     z-index: 10 !important;
-    padding: 8.773cqw 8.8cqw 11.38cqw 30.1cqw;
-    padding-top: 8.773cqw !important;
+    padding-top: 9.8cqw !important;
     padding-left: 30.1cqw !important;
     padding-right: 8.8cqw !important;
     color: #1a1a2e !important;
-    line-height: 4.954cqw;
+    line-height: 5.04cqw;
     font-weight: 500;
     font-family: 'Noto Sans KR', 'Inter', sans-serif;
     font-size: 2.1cqw;
@@ -785,7 +784,7 @@ textarea, .reference-text {
   }
 
   .textarea-wrapper.even-page .print-text-overlay {
-    padding-top: 8.773cqw !important;
+    padding-top: 9.8cqw !important;
     padding-left: 17.6cqw !important;
     padding-right: 21.3cqw !important;
   }
