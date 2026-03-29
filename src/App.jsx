@@ -11,14 +11,14 @@ const SHORTCUTS = { '1': '·', '2': '•' };
    All expressed as fractions of the wrapper WIDTH.
    With aspect-ratio: 1956/2526, vertical px / 1956 = fraction of width. */
 const G = {
-  padTop:    0.08773,   // (268.5 − 96.9) / 1956 — first line bottom aligns with first grid line
-  padBottom: 0.11380,   // remaining space below 22 rows
-  padLeftOdd:  0.301,   // odd page left margin (번호 column)
+  padTop:    0.0885,    // Vertically nudged down to align better with first line
+  padBottom: 0.11380,
+  padLeftOdd:  0.301,
   padRightOdd: 0.088,
-  padLeftEven:  0.176,  // even page (mirrored)
+  padLeftEven:  0.176,
   padRightEven: 0.213,
-  lineHeight: 0.04954,  // 96.9px / 1956 — exact grid row spacing
-  fontSize:   0.021,
+  lineHeight: 0.04985,  // Increased slightly to prevent upward drift (cumulative correction)
+  fontSize:   0.0215,   // Slightly larger for better readability
 };
 
 const compressText = (text) => text.replace(/#/g, '').split('\n').map(l => l.trim()).filter(l => l.length > 0).join('\n');
