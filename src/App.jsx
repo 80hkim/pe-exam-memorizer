@@ -27,13 +27,13 @@ const G = {
     fontSize: 0.022,
   },
   ipad: {
-    padTop: 0.092,
+    padTop: 0.0915,
     padBottom: 0.1138,
     padLeftOdd: 0.301,
     padRightOdd: 0.088,
     padLeftEven: 0.176,
     padRightEven: 0.213,
-    lineHeight: 0.0517,
+    lineHeight: 0.05156,
     fontSize: 0.022,
   }
 };
