@@ -11,20 +11,19 @@ const SHORTCUTS = { '1': '·', '2': '•' };
    All expressed as fractions of the wrapper WIDTH.
    With aspect-ratio: 1956/2526, vertical px / 1956 = fraction of width. */
 const isiPad = (typeof navigator !== 'undefined') && (
-  (/iPad|iPhone|iPod/.test(navigator.userAgent) || 
-  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) &&
-  !/Windows|Android/.test(navigator.userAgent) // Ensure it's not a touch-enabled PC or tablet
-);
+  /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+) && (typeof window !== 'undefined' && window.innerWidth < 1100);
 
 const G = {
   pc: {
-    padTop: 0.098,
+    padTop: 0.099,
     padBottom: 0.1138,
     padLeftOdd: 0.301,
     padRightOdd: 0.088,
     padLeftEven: 0.176,
     padRightEven: 0.213,
-    lineHeight: 0.0504,
+    lineHeight: 0.04955,
     fontSize: 0.021,
   },
   ipad: {
