@@ -768,10 +768,10 @@ textarea, .reference-text {
 
   .textarea-wrapper:not(.print-exclude) {
     width: 210mm !important;
-    height: 297mm !important;
+    height: auto !important;
     max-width: none !important;
     max-height: none !important;
-    aspect-ratio: auto !important;
+    aspect-ratio: 1956 / 2526 !important;
     background-color: white !important;
     /* Force browser to print the background image */
     -webkit-print-color-adjust: exact !important;
