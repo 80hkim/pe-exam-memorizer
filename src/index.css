@@ -452,9 +452,9 @@ textarea, .reference-text {
   /* Exactly proportional to the answer sheet */
   width: min(100cqw, 100cqh * (1359 / 1754));
   aspect-ratio: 1359 / 1754;
-  container-type: inline-size;
+  container-type: size;
   position: relative;
-  
+
   /* Paper visual styles */
   background-color: #ffffff;
   border-radius: 4px;
