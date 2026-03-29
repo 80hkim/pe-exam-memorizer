@@ -452,7 +452,7 @@ textarea, .reference-text {
   /* Exactly proportional to the answer sheet */
   width: min(100cqw, 100cqh * (1359 / 1754));
   aspect-ratio: 1359 / 1754;
-  container-type: size;
+  container-type: inline-size;
   position: relative;
 
   /* Paper visual styles */
@@ -483,12 +483,12 @@ textarea, .reference-text {
   flex: none;
   box-sizing: border-box;
   resize: none;
-  /* Decoupled 2D exact mapping allows physical page stretching without misalignment */
-  padding: 6.793cqh 8.8cqw 7.748cqh 30.1cqw;
+  /* All values in cqw (aspect-ratio locked) for cross-device consistency */
+  padding: 8.767cqw 8.8cqw 10.001cqw 30.1cqw;
   position: relative;
   z-index: 1;
   color: #1a1a2e;
-  line-height: 3.836cqh;
+  line-height: 4.951cqw;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -505,7 +505,7 @@ textarea, .reference-text {
 /* 짝수 페이지용 미러링 패딩 (바인딩 마진 좌우 반전) */
 .textarea-wrapper.even-page textarea,
 .textarea-wrapper.even-page .print-text-overlay {
-  padding-top: 6.793cqh !important;
+  padding-top: 8.767cqw !important;
   padding-left: 17.6cqw !important;
   padding-right: 21.3cqw !important;
 }
@@ -721,12 +721,12 @@ textarea, .reference-text {
     box-sizing: border-box;
     position: relative;
     z-index: 10 !important;
-    padding: 6.793cqh 8.8cqw 7.748cqh 30.1cqw;
-    padding-top: 6.793cqh !important;
+    padding: 8.767cqw 8.8cqw 10.001cqw 30.1cqw;
+    padding-top: 8.767cqw !important;
     padding-left: 30.1cqw !important;
     padding-right: 8.8cqw !important;
     color: #1a1a2e !important;
-    line-height: 3.836cqh;
+    line-height: 4.951cqw;
     font-weight: 500;
     font-family: 'Noto Sans KR', 'Inter', sans-serif;
     font-size: 2.1cqw;
@@ -748,13 +748,13 @@ textarea, .reference-text {
     page-break-after: always;
     page-break-inside: avoid;
     break-after: page;
-    container-type: size !important;
+    container-type: inline-size !important;
     box-shadow: none !important;
     border-radius: 0 !important;
   }
 
   .textarea-wrapper.even-page .print-text-overlay {
-    padding-top: 6.793cqh !important;
+    padding-top: 8.767cqw !important;
     padding-left: 17.6cqw !important;
     padding-right: 21.3cqw !important;
   }
