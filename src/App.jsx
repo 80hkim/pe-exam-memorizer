@@ -10,15 +10,32 @@ const SHORTCUTS = { '1': '·', '2': '•' };
 /* Grid constants derived from answer-sheet image pixel analysis (1956×2526).
    All expressed as fractions of the wrapper WIDTH.
    With aspect-ratio: 1956/2526, vertical px / 1956 = fraction of width. */
+const isiPad = (typeof navigator !== 'undefined') && (
+  /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+);
+
 const G = {
-  padTop:    0.0885,    // Vertically nudged down to align better with first line
-  padBottom: 0.11380,
-  padLeftOdd:  0.301,
-  padRightOdd: 0.088,
-  padLeftEven:  0.176,
-  padRightEven: 0.213,
-  lineHeight: 0.04985,  // Increased slightly to prevent upward drift (cumulative correction)
-  fontSize:   0.0215,   // Slightly larger for better readability
+  pc: {
+    padTop: 0.0995,
+    padBottom: 0.1138,
+    padLeftOdd: 0.301,
+    padRightOdd: 0.088,
+    padLeftEven: 0.176,
+    padRightEven: 0.213,
+    lineHeight: 0.05115,
+    fontSize: 0.022,
+  },
+  ipad: {
+    padTop: 0.106,
+    padBottom: 0.1138,
+    padLeftOdd: 0.301,
+    padRightOdd: 0.088,
+    padLeftEven: 0.176,
+    padRightEven: 0.213,
+    lineHeight: 0.0526,
+    fontSize: 0.022,
+  }
 };
 
 const compressText = (text) => text.replace(/#/g, '').split('\n').map(l => l.trim()).filter(l => l.length > 0).join('\n');
@@ -106,13 +123,14 @@ const App = () => {
     const calc = () => {
       const w = el.offsetWidth;
       const isEven = currentPage % 2 === 0;
+      const activeG = isiPad ? G.ipad : G.pc;
       setTaStyles({
-        paddingTop:    `${w * G.padTop}px`,
-        paddingBottom: `${w * G.padBottom}px`,
-        paddingLeft:   `${w * (isEven ? G.padLeftEven : G.padLeftOdd)}px`,
-        paddingRight:  `${w * (isEven ? G.padRightEven : G.padRightOdd)}px`,
-        lineHeight:    `${w * G.lineHeight}px`,
-        fontSize:      `${w * G.fontSize}px`,
+        paddingTop:    `${w * activeG.padTop}px`,
+        paddingBottom: `${w * activeG.padBottom}px`,
+        paddingLeft:   `${w * (isEven ? activeG.padLeftEven : activeG.padLeftOdd)}px`,
+        paddingRight:  `${w * (isEven ? activeG.padRightEven : activeG.padRightOdd)}px`,
+        lineHeight:    `${w * activeG.lineHeight}px`,
+        fontSize:      `${w * activeG.fontSize}px`,
       });
     };
     calc();
