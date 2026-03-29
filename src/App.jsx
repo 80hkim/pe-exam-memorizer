@@ -7,6 +7,19 @@ const EMPTY_PAGES = Array(TOTAL_PAGES).fill('');
 const DEFAULT_PLACEHOLDER = '📂 위의 [파일 업로드] 버튼을 눌러 연습하실 MD 파일을 올려주세요.';
 const SHORTCUTS = { '1': '·', '2': '•' };
 
+/* Grid constants derived from answer-sheet image pixel analysis (1956×2526)
+   All expressed as fractions of the wrapper WIDTH (aspect-ratio locked). */
+const G = {
+  padTop:    0.08767,   // first row top
+  padBottom: 0.10001,
+  padLeftOdd:  0.301,   // odd page left margin (번호 column)
+  padRightOdd: 0.088,
+  padLeftEven:  0.176,  // even page (mirrored)
+  padRightEven: 0.213,
+  lineHeight: 0.04951,  // row spacing
+  fontSize:   0.021,
+};
+
 const compressText = (text) => text.replace(/#/g, '').split('\n').map(l => l.trim()).filter(l => l.length > 0).join('\n');
 
 const getStoredDocs = () => {
@@ -83,8 +96,9 @@ const App = () => {
     localStorage.setItem('pe-exam-selected-doc-id', selectedDocsId);
   }, [selectedDocsId]);
 
-  /* Compute textarea pixel styles from wrapper width via ResizeObserver
-     — eliminates cqw/cqh cross-browser issues (iPad WebKit) */
+  /* Compute pixel styles from wrapper width via ResizeObserver.
+     Uses a plain <div> overlay for text display (bypasses iOS textarea line-height bugs).
+     The hidden textarea still handles keyboard input. */
   useEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
@@ -92,12 +106,12 @@ const App = () => {
       const w = el.offsetWidth;
       const isEven = currentPage % 2 === 0;
       setTaStyles({
-        paddingTop:    `${w * 0.08767}px`,
-        paddingBottom: `${w * 0.10001}px`,
-        paddingLeft:   `${w * (isEven ? 0.176 : 0.301)}px`,
-        paddingRight:  `${w * (isEven ? 0.213 : 0.088)}px`,
-        lineHeight:    `${w * 0.04951}px`,
-        fontSize:      `${w * 0.021}px`,
+        paddingTop:    `${w * G.padTop}px`,
+        paddingBottom: `${w * G.padBottom}px`,
+        paddingLeft:   `${w * (isEven ? G.padLeftEven : G.padLeftOdd)}px`,
+        paddingRight:  `${w * (isEven ? G.padRightEven : G.padRightOdd)}px`,
+        lineHeight:    `${w * G.lineHeight}px`,
+        fontSize:      `${w * G.fontSize}px`,
       });
     };
     calc();
@@ -267,15 +281,25 @@ const App = () => {
                   loading={currentPage === i + 1 ? 'eager' : 'lazy'}
                 />
                 {currentPage === i + 1 && (
-                  <textarea
-                    ref={rightPaneRef}
-                    value={pages[i]}
-                    onChange={(e) => handlePageChange(i, e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="왼쪽의 내용을 보며 여기에 타이핑을 시작하세요... [단축키] Ctrl+1: · (가운데 점), Ctrl+2: • (목록 점)"
-                    className="print-hide"
-                    style={taStyles}
-                  />
+                  <>
+                    {/* Hidden textarea — handles keyboard input, cursor, selection */}
+                    <textarea
+                      ref={rightPaneRef}
+                      value={pages[i]}
+                      onChange={(e) => handlePageChange(i, e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      className="print-hide typing-input"
+                      style={taStyles}
+                    />
+                    {/* Visible div overlay — renders text with correct line-height (bypasses iOS textarea bugs) */}
+                    <div
+                      className="print-hide text-display"
+                      style={taStyles}
+                      onClick={() => rightPaneRef.current?.focus()}
+                    >
+                      {pages[i] || <span className="placeholder-text">왼쪽의 내용을 보며 여기에 타이핑을 시작하세요... [단축키] Ctrl+1: · (가운데 점), Ctrl+2: • (목록 점)</span>}
+                    </div>
+                  </>
                 )}
                 <div className="print-show print-text-overlay">{pText}</div>
               </div>

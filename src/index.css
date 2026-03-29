@@ -475,7 +475,9 @@ textarea, .reference-text {
   z-index: 0;
 }
 
-.right-panel textarea {
+/* Hidden textarea — captures keyboard input but text is invisible.
+   padding/line-height/font-size set by JS ResizeObserver inline styles. */
+.right-panel .typing-input {
   margin: 0;
   width: 100%;
   height: 100%;
@@ -483,19 +485,43 @@ textarea, .reference-text {
   flex: none;
   box-sizing: border-box;
   resize: none;
-  /* padding, line-height, font-size are set via JS ResizeObserver for cross-device accuracy */
-  position: relative;
-  z-index: 1;
-  color: #1a1a2e;
+  position: absolute;
+  top: 0; left: 0;
+  z-index: 2;              /* above the display div so it gets focus */
+  color: transparent;       /* hide textarea's own text rendering */
+  caret-color: #1a1a2e;    /* but show the blinking cursor */
   background: transparent;
   border: none;
   box-shadow: none;
+  outline: none;
   font-weight: 500;
   font-family: 'Noto Sans KR', 'Inter', sans-serif;
   letter-spacing: -0.01em;
+  -webkit-appearance: none;
+  -webkit-text-size-adjust: none;
 }
 
-.right-panel textarea::placeholder {
+/* Visible text display — a plain <div> that respects line-height on ALL browsers.
+   padding/line-height/font-size set by JS ResizeObserver inline styles. */
+.right-panel .text-display {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  z-index: 1;
+  color: #1a1a2e;
+  font-weight: 500;
+  font-family: 'Noto Sans KR', 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow: hidden;
+  pointer-events: none;     /* clicks pass through to the textarea */
+  cursor: text;
+}
+
+.right-panel .text-display .placeholder-text {
   color: #b0b0c0;
 }
 
