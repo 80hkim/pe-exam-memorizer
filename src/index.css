@@ -484,11 +484,11 @@ textarea, .reference-text {
   box-sizing: border-box;
   resize: none;
   /* Decoupled 2D exact mapping allows physical page stretching without misalignment */
-  padding: 6.857cqh 8.8cqw 7.748cqh 30.1cqw;
+  padding: 6.793cqh 8.8cqw 7.748cqh 30.1cqw;
   position: relative;
   z-index: 1;
   color: #1a1a2e;
-  line-height: 3.831cqh;
+  line-height: 3.836cqh;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -505,7 +505,7 @@ textarea, .reference-text {
 /* 짝수 페이지용 미러링 패딩 (바인딩 마진 좌우 반전) */
 .textarea-wrapper.even-page textarea,
 .textarea-wrapper.even-page .print-text-overlay {
-  padding-top: 7.05cqh !important;
+  padding-top: 6.793cqh !important;
   padding-left: 17.6cqw !important;
   padding-right: 21.3cqw !important;
 }
@@ -721,12 +721,12 @@ textarea, .reference-text {
     box-sizing: border-box;
     position: relative;
     z-index: 10 !important;
-    padding: 6.857cqh 8.8cqw 7.748cqh 30.1cqw;
-    padding-top: 6.857cqh !important;
+    padding: 6.793cqh 8.8cqw 7.748cqh 30.1cqw;
+    padding-top: 6.793cqh !important;
     padding-left: 30.1cqw !important;
     padding-right: 8.8cqw !important;
     color: #1a1a2e !important;
-    line-height: 3.831cqh;
+    line-height: 3.836cqh;
     font-weight: 500;
     font-family: 'Noto Sans KR', 'Inter', sans-serif;
     font-size: 2.1cqw;
@@ -754,7 +754,7 @@ textarea, .reference-text {
   }
 
   .textarea-wrapper.even-page .print-text-overlay {
-    padding-top: 7.05cqh !important;
+    padding-top: 6.793cqh !important;
     padding-left: 17.6cqw !important;
     padding-right: 21.3cqw !important;
   }
