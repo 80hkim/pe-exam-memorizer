@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "mcp__Claude_Preview__preview_start",
-      "Bash(start chrome:*)"
+      "Bash(start chrome:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

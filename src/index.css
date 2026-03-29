@@ -449,7 +449,10 @@ textarea, .reference-text {
 }
 
 .textarea-wrapper {
-  /* Exactly proportional to the answer sheet */
+  /* Fallback for older browsers (non Container Queries) */
+  width: 90vw;
+  width: min(90vw, 85vh * (1956 / 2526));
+  /* Professional mapping using modern Container Queries */
   width: min(100cqw, 100cqh * (1956 / 2526));
   aspect-ratio: 1956 / 2526;
   container-type: inline-size;

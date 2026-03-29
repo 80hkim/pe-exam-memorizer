@@ -116,9 +116,11 @@ const App = () => {
       });
     };
     calc();
-    const ro = new ResizeObserver(calc);
-    ro.observe(el);
-    return () => ro.disconnect();
+    if (typeof window.ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(calc);
+      ro.observe(el);
+      return () => ro.disconnect();
+    }
   }, [currentPage]);
 
   const resetPages = useCallback(() => {
@@ -185,7 +187,11 @@ const App = () => {
   };
 
   const lastFilledPageIndex = useMemo(() => {
-    return pages.findLastIndex(p => p.trim()) ?? 0;
+    // Legacy compatible way to find last non-empty index
+    for (let i = pages.length - 1; i >= 0; i--) {
+      if (pages[i].trim()) return i;
+    }
+    return 0;
   }, [pages]);
 
   const insertAtCursor = (char) => {
