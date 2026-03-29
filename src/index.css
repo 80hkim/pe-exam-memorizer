@@ -449,9 +449,12 @@ textarea, .reference-text {
 }
 
 .textarea-wrapper {
-  /* Fallback for older browsers (non Container Queries) */
+  /* Fallback for older browsers (non Container Queries or aspect-ratio) */
   width: 90vw;
+  height: 110vw; /* Approx 4:3 / A4 fallbacks */
   width: min(90vw, 85vh * (1956 / 2526));
+  height: auto;
+  min-height: 200px;
   /* Professional mapping using modern Container Queries */
   width: min(100cqw, 100cqh * (1956 / 2526));
   aspect-ratio: 1956 / 2526;

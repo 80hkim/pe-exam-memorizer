@@ -230,7 +230,7 @@ const App = () => {
           </div>
 
           <input type="file" accept=".md,.txt" style={{display: 'none'}} ref={fileInputRef} onChange={handleFileUpload} />
-          <button onClick={() => fileInputRef.current?.click()}>
+          <button onClick={() => { if (fileInputRef.current) fileInputRef.current.click() }}>
             <Upload size={15} /> 파일 업로드
           </button>
           <button onClick={handleReset}>
@@ -302,7 +302,7 @@ const App = () => {
                     <div
                       className="print-hide text-display"
                       style={taStyles}
-                      onClick={() => rightPaneRef.current?.focus()}
+                      onClick={() => { if (rightPaneRef.current) rightPaneRef.current.focus() }}
                     >
                       {pages[i] || <span className="placeholder-text">왼쪽의 내용을 보며 여기에 타이핑을 시작하세요... [단축키] Ctrl+1: · (가운데 점), Ctrl+2: • (목록 점)</span>}
                     </div>
