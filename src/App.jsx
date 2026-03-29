@@ -7,16 +7,17 @@ const EMPTY_PAGES = Array(TOTAL_PAGES).fill('');
 const DEFAULT_PLACEHOLDER = '📂 위의 [파일 업로드] 버튼을 눌러 연습하실 MD 파일을 올려주세요.';
 const SHORTCUTS = { '1': '·', '2': '•' };
 
-/* Grid constants derived from answer-sheet image pixel analysis (1956×2526)
-   All expressed as fractions of the wrapper WIDTH (aspect-ratio locked). */
+/* Grid constants derived from answer-sheet image pixel analysis (1956×2526).
+   All expressed as fractions of the wrapper WIDTH.
+   With aspect-ratio: 1956/2526, vertical px / 1956 = fraction of width. */
 const G = {
-  padTop:    0.08767,   // first row top
-  padBottom: 0.10001,
+  padTop:    0.08773,   // (268.5 − 96.9) / 1956 — first line bottom aligns with first grid line
+  padBottom: 0.11380,   // remaining space below 22 rows
   padLeftOdd:  0.301,   // odd page left margin (번호 column)
   padRightOdd: 0.088,
   padLeftEven:  0.176,  // even page (mirrored)
   padRightEven: 0.213,
-  lineHeight: 0.04951,  // row spacing
+  lineHeight: 0.04954,  // 96.9px / 1956 — exact grid row spacing
   fontSize:   0.021,
 };
 

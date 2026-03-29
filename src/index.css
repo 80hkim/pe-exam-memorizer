@@ -450,8 +450,8 @@ textarea, .reference-text {
 
 .textarea-wrapper {
   /* Exactly proportional to the answer sheet */
-  width: min(100cqw, 100cqh * (1359 / 1754));
-  aspect-ratio: 1359 / 1754;
+  width: min(100cqw, 100cqh * (1956 / 2526));
+  aspect-ratio: 1956 / 2526;
   container-type: inline-size;
   position: relative;
 
@@ -475,8 +475,8 @@ textarea, .reference-text {
   z-index: 0;
 }
 
-/* Hidden textarea — captures keyboard input but text is invisible.
-   padding/line-height/font-size set by JS ResizeObserver inline styles. */
+/* Hidden textarea — captures keyboard input but text is completely invisible.
+   Sits BELOW the display div; receives clicks via pointer-events passthrough. */
 .right-panel .typing-input {
   margin: 0;
   width: 100%;
@@ -487,10 +487,13 @@ textarea, .reference-text {
   resize: none;
   position: absolute;
   top: 0; left: 0;
-  z-index: 2;              /* above the display div so it gets focus */
-  color: transparent;       /* hide textarea's own text rendering */
-  caret-color: #1a1a2e;    /* but show the blinking cursor */
-  background: transparent;
+  z-index: 1;
+  /* Triple-layer transparency for iOS WebKit */
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  caret-color: #1a1a2e;
+  background: transparent !important;
   border: none;
   box-shadow: none;
   outline: none;
@@ -502,14 +505,14 @@ textarea, .reference-text {
 }
 
 /* Visible text display — a plain <div> that respects line-height on ALL browsers.
-   padding/line-height/font-size set by JS ResizeObserver inline styles. */
+   Sits ABOVE the textarea; pointer-events: none lets clicks pass through to textarea. */
 .right-panel .text-display {
   position: absolute;
   top: 0; left: 0;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  z-index: 1;
+  z-index: 2;
   color: #1a1a2e;
   font-weight: 500;
   font-family: 'Noto Sans KR', 'Inter', sans-serif;
@@ -517,7 +520,7 @@ textarea, .reference-text {
   white-space: pre-wrap;
   word-break: keep-all;
   overflow: hidden;
-  pointer-events: none;     /* clicks pass through to the textarea */
+  pointer-events: none;
   cursor: text;
 }
 
@@ -527,7 +530,7 @@ textarea, .reference-text {
 
 /* 짝수 페이지용 미러링 패딩 (바인딩 마진 좌우 반전) — print overlay only, textarea handled by JS */
 .textarea-wrapper.even-page .print-text-overlay {
-  padding-top: 8.767cqw !important;
+  padding-top: 8.773cqw !important;
   padding-left: 17.6cqw !important;
   padding-right: 21.3cqw !important;
 }
@@ -743,12 +746,12 @@ textarea, .reference-text {
     box-sizing: border-box;
     position: relative;
     z-index: 10 !important;
-    padding: 8.767cqw 8.8cqw 10.001cqw 30.1cqw;
-    padding-top: 8.767cqw !important;
+    padding: 8.773cqw 8.8cqw 11.38cqw 30.1cqw;
+    padding-top: 8.773cqw !important;
     padding-left: 30.1cqw !important;
     padding-right: 8.8cqw !important;
     color: #1a1a2e !important;
-    line-height: 4.951cqw;
+    line-height: 4.954cqw;
     font-weight: 500;
     font-family: 'Noto Sans KR', 'Inter', sans-serif;
     font-size: 2.1cqw;
@@ -776,7 +779,7 @@ textarea, .reference-text {
   }
 
   .textarea-wrapper.even-page .print-text-overlay {
-    padding-top: 8.767cqw !important;
+    padding-top: 8.773cqw !important;
     padding-left: 17.6cqw !important;
     padding-right: 21.3cqw !important;
   }
