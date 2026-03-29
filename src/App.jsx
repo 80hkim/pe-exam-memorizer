@@ -58,8 +58,10 @@ const App = () => {
   const [selectedDocsId, setSelectedDocsId] = useState(initial.selectedDocsId);
 
   const rightPaneRef = useRef(null);
+  const wrapperRef = useRef(null);
   const fileInputRef = useRef(null);
   const pagesTimerRef = useRef(null);
+  const [taStyles, setTaStyles] = useState({});
 
   useEffect(() => {
     localStorage.setItem('pe-exam-ref-text', referenceText);
@@ -80,6 +82,29 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('pe-exam-selected-doc-id', selectedDocsId);
   }, [selectedDocsId]);
+
+  /* Compute textarea pixel styles from wrapper width via ResizeObserver
+     — eliminates cqw/cqh cross-browser issues (iPad WebKit) */
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const calc = () => {
+      const w = el.offsetWidth;
+      const isEven = currentPage % 2 === 0;
+      setTaStyles({
+        paddingTop:    `${w * 0.08767}px`,
+        paddingBottom: `${w * 0.10001}px`,
+        paddingLeft:   `${w * (isEven ? 0.176 : 0.301)}px`,
+        paddingRight:  `${w * (isEven ? 0.213 : 0.088)}px`,
+        lineHeight:    `${w * 0.04951}px`,
+        fontSize:      `${w * 0.021}px`,
+      });
+    };
+    calc();
+    const ro = new ResizeObserver(calc);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [currentPage]);
 
   const resetPages = useCallback(() => {
     setPages([...EMPTY_PAGES]);
@@ -232,6 +257,7 @@ const App = () => {
             {pages.map((pText, i) => (
               <div
                 key={i}
+                ref={currentPage === i + 1 ? wrapperRef : null}
                 className={`textarea-wrapper ${currentPage === i + 1 ? 'active-page' : ''} ${(i + 1) % 2 === 0 ? 'even-page' : 'odd-page'} ${i > lastFilledPageIndex ? 'print-exclude' : ''}`}
               >
                 <img
@@ -248,6 +274,7 @@ const App = () => {
                     onKeyDown={handleKeyDown}
                     placeholder="왼쪽의 내용을 보며 여기에 타이핑을 시작하세요... [단축키] Ctrl+1: · (가운데 점), Ctrl+2: • (목록 점)"
                     className="print-hide"
+                    style={taStyles}
                   />
                 )}
                 <div className="print-show print-text-overlay">{pText}</div>

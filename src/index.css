@@ -483,18 +483,15 @@ textarea, .reference-text {
   flex: none;
   box-sizing: border-box;
   resize: none;
-  /* All values in cqw (aspect-ratio locked) for cross-device consistency */
-  padding: 8.767cqw 8.8cqw 10.001cqw 30.1cqw;
+  /* padding, line-height, font-size are set via JS ResizeObserver for cross-device accuracy */
   position: relative;
   z-index: 1;
   color: #1a1a2e;
-  line-height: 4.951cqw;
   background: transparent;
   border: none;
   box-shadow: none;
   font-weight: 500;
   font-family: 'Noto Sans KR', 'Inter', sans-serif;
-  font-size: 2.1cqw;
   letter-spacing: -0.01em;
 }
 
@@ -502,8 +499,7 @@ textarea, .reference-text {
   color: #b0b0c0;
 }
 
-/* 짝수 페이지용 미러링 패딩 (바인딩 마진 좌우 반전) */
-.textarea-wrapper.even-page textarea,
+/* 짝수 페이지용 미러링 패딩 (바인딩 마진 좌우 반전) — print overlay only, textarea handled by JS */
 .textarea-wrapper.even-page .print-text-overlay {
   padding-top: 8.767cqw !important;
   padding-left: 17.6cqw !important;
