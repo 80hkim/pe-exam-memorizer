@@ -17,23 +17,23 @@ const isiPad = (typeof navigator !== 'undefined') && (
 
 const G = {
   pc: {
-    padTop: 0.099,
-    padBottom: 0.1138,
+    padTop: 0.08773,
+    padBottom: 0.114,
     padLeftOdd: 0.301,
     padRightOdd: 0.088,
     padLeftEven: 0.176,
     padRightEven: 0.213,
-    lineHeight: 0.04955,
+    lineHeight: 0.04954,
     fontSize: 0.021,
   },
   ipad: {
-    padTop: 0.1,
-    padBottom: 0.1138,
+    padTop: 0.08773,
+    padBottom: 0.114,
     padLeftOdd: 0.301,
     padRightOdd: 0.088,
     padLeftEven: 0.176,
     padRightEven: 0.213,
-    lineHeight: 0.0498,
+    lineHeight: 0.04954,
     fontSize: 0.022,
   }
 };
